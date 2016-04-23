@@ -63,6 +63,7 @@ namespace CisLab1
         {
             DateTime eldest = dir.CreationTime;
             
+            
 
             return eldest.ToString();
         }
@@ -144,7 +145,8 @@ namespace CisLab1
                 var file = new DirectoryInfo(location);
                 this.children = new List<DiskFile>();
                 
-                this.root = file;                
+                this.root = file;
+                this.dir = file; 
                 this.location = location;
                 this.name = file.Name;
 
@@ -197,12 +199,11 @@ namespace CisLab1
         }
 
         public void TheEldest()
-        {
-            string eldest = "";
-          //  string eldest = this.dir.EldestElement(); 
+        {            
+            string eldest = this.dir.EldestElement(); 
 
             Console.WriteLine();
-            Console.WriteLine("Najstarszy plik: ", eldest);
+            Console.WriteLine("Najstarszy plik: {0}", eldest);
         }
 
         public void AddToSortedColection()
