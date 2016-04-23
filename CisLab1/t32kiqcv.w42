@@ -198,8 +198,7 @@ namespace CisLab1
 
         public void TheEldest()
         {
-            string eldest = "";
-          //  string eldest = this.dir.EldestElement(); 
+            string eldest = this.dir.EldestElement(); 
 
             Console.WriteLine();
             Console.WriteLine("Najstarszy plik: ", eldest);
@@ -243,9 +242,6 @@ namespace CisLab1
 
             DiskFile rootDirectory = new DiskFile(args[0]);
             rootDirectory.WriteTree();
-
-            rootDirectory.TheEldest();
-
             rootDirectory.AddToSortedColection();
 
             rootDirectory.Serialization();            

@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +9,8 @@ using System.Threading.Tasks;
 
 namespace CisLab1
 {
+    using System.IO.DirectoryInfo;
+    using System.IO.FileSystemInfo;
 
     public static class Extensions
     {
@@ -62,44 +62,9 @@ namespace CisLab1
         public static string EldestElement(this DirectoryInfo dir)
         {
             DateTime eldest = dir.CreationTime;
-            
+
 
             return eldest.ToString();
-        }
-    }
-
-    [Serializable]
-    class CustomStringComparer : IComparer<string>
-    {
-        private readonly IComparer<string> _baseComparer;
-        public CustomStringComparer(IComparer<string> baseComparer)
-        {
-            _baseComparer = baseComparer;
-        }
-
-        public int Compare(string x, string y)
-        {
-            if(x.Length > y.Length)
-                return 1;
-            else if(x.Length < y.Length)
-                return -1;
-            /*
-             if (_baseComparer.Compare(x, y) == 0)
-                return 0;
-
-            // "b" comes before everything else
-            if (_baseComparer.Compare(x, "b") == 0)
-                return -1;
-            if (_baseComparer.Compare(y, "b") == 0)
-                return 1;
-
-            // "c" comes next
-            if (_baseComparer.Compare(x, "c") == 0)
-                return -1;
-            if (_baseComparer.Compare(y, "c") == 0)
-                return 1;
-            */
-            return _baseComparer.Compare(x, y);
         }
     }
 
@@ -112,12 +77,9 @@ namespace CisLab1
             File
         };
 
-
-        private SortedDictionary<string, long> elements; 
-
         private long size;
-        private DirectoryInfo dir;
-        private FileSystemInfo root;       
+        private DirectoryInfo root;
+        private SortedDictionary<string, long> elements;
         private List<DiskFile> children;
         private string name;
         private string location;
@@ -143,17 +105,18 @@ namespace CisLab1
                 this.type = Types.Directory;
                 var file = new DirectoryInfo(location);
                 this.children = new List<DiskFile>();
-                
-                this.root = file;                
+
+                this.root = file;
                 this.location = location;
                 this.name = file.Name;
 
                 var files = file.GetFileSystemInfos();
                 foreach (var f in files)
                 {
-                    this.children.Add(new DiskFile(f.FullName));                   
+                    var zm = new DiskFile(f.FullName);
+                    this.children.Add(zm);
                 }
-                this.size = this.children.Count;
+
  
             }               
             else
@@ -162,7 +125,6 @@ namespace CisLab1
                
                 var file = new FileInfo(location);
 
-                this.root = file;  
                 this.location = location;
                 this.name = file.Name;
                 this.size = file.Length;
@@ -186,7 +148,6 @@ namespace CisLab1
                 Console.Write(" {0}  bajts ", this.size);
 
             Console.Write(" {0} \n", this.root.RAHS());
-           // Console.Write("\n");
 
             level++;
             if(this.type == Types.Directory)
@@ -195,43 +156,6 @@ namespace CisLab1
                 }
 
         }
-
-        public void TheEldest()
-        {
-            string eldest = "";
-          //  string eldest = this.dir.EldestElement(); 
-
-            Console.WriteLine();
-            Console.WriteLine("Najstarszy plik: ", eldest);
-        }
-
-        public void AddToSortedColection()
-        {
-            this.elements = new SortedDictionary<string, long>(new CustomStringComparer(StringComparer.CurrentCulture));
-            foreach(DiskFile f in this.children)
-            {
-                this.elements.Add(f.name, f.size);
-            }
-        }
-
-        public void Serialization()
-        {
-            IFormatter formatter = new BinaryFormatter();
-
-            Stream outputStream = File.OpenWrite("dictionary.bin");
-            formatter.Serialize(outputStream, this.elements);
-            outputStream.Close();
-
-            Stream inputStream = File.OpenRead("dictionary.bin");
-            SortedDictionary<string, long> elements2 = (SortedDictionary<string, long>)formatter.Deserialize(inputStream);
-
-            Console.WriteLine();
-            foreach (KeyValuePair<string, long> kvp in elements2)
-            {
-                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            }
-        }
-
 
     }
 
@@ -243,12 +167,6 @@ namespace CisLab1
 
             DiskFile rootDirectory = new DiskFile(args[0]);
             rootDirectory.WriteTree();
-
-            rootDirectory.TheEldest();
-
-            rootDirectory.AddToSortedColection();
-
-            rootDirectory.Serialization();            
             
             Console.ReadKey();
 

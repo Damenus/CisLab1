@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -68,7 +66,6 @@ namespace CisLab1
         }
     }
 
-    [Serializable]
     class CustomStringComparer : IComparer<string>
     {
         private readonly IComparer<string> _baseComparer;
@@ -112,11 +109,10 @@ namespace CisLab1
             File
         };
 
-
         private SortedDictionary<string, long> elements; 
 
         private long size;
-        private DirectoryInfo dir;
+        //private DirectoryInfo root;
         private FileSystemInfo root;       
         private List<DiskFile> children;
         private string name;
@@ -143,7 +139,7 @@ namespace CisLab1
                 this.type = Types.Directory;
                 var file = new DirectoryInfo(location);
                 this.children = new List<DiskFile>();
-                
+
                 this.root = file;                
                 this.location = location;
                 this.name = file.Name;
@@ -153,7 +149,7 @@ namespace CisLab1
                 {
                     this.children.Add(new DiskFile(f.FullName));                   
                 }
-                this.size = this.children.Count;
+
  
             }               
             else
@@ -196,15 +192,6 @@ namespace CisLab1
 
         }
 
-        public void TheEldest()
-        {
-            string eldest = "";
-          //  string eldest = this.dir.EldestElement(); 
-
-            Console.WriteLine();
-            Console.WriteLine("Najstarszy plik: ", eldest);
-        }
-
         public void AddToSortedColection()
         {
             this.elements = new SortedDictionary<string, long>(new CustomStringComparer(StringComparer.CurrentCulture));
@@ -214,24 +201,9 @@ namespace CisLab1
             }
         }
 
-        public void Serialization()
-        {
-            IFormatter formatter = new BinaryFormatter();
+        IComparer<string> 
 
-            Stream outputStream = File.OpenWrite("dictionary.bin");
-            formatter.Serialize(outputStream, this.elements);
-            outputStream.Close();
-
-            Stream inputStream = File.OpenRead("dictionary.bin");
-            SortedDictionary<string, long> elements2 = (SortedDictionary<string, long>)formatter.Deserialize(inputStream);
-
-            Console.WriteLine();
-            foreach (KeyValuePair<string, long> kvp in elements2)
-            {
-                Console.WriteLine("Key = {0}, Value = {1}", kvp.Key, kvp.Value);
-            }
-        }
-
+    
 
     }
 
@@ -243,12 +215,6 @@ namespace CisLab1
 
             DiskFile rootDirectory = new DiskFile(args[0]);
             rootDirectory.WriteTree();
-
-            rootDirectory.TheEldest();
-
-            rootDirectory.AddToSortedColection();
-
-            rootDirectory.Serialization();            
             
             Console.ReadKey();
 
